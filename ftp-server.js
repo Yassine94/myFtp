@@ -23,8 +23,8 @@ if (program.readOnly === false) readOnly = false
 const opts = {
     root: program.args[0] || process.cwd(),
     readOnly: readOnly,
-    host: program.host || '127.0.0.1',
-    port: program.port || 1337,
+    host: program.host || '0.0.0.0',
+    port: program.port || 21,
     maxConnections: program.maxConnections || 10
 }
 
