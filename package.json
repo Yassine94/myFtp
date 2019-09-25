@@ -1,19 +1,22 @@
 {
   "name": "myftp",
   "version": "1.0.0",
-  "description": "School project",
+  "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "launch:client": "nodemon --exec babel-node client/ftpClient.js 127.0.0.1 2121 ",
+    "launch:server": "nodemon back/ftpServer.js --exec babel-node"
   },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/Yassine94/myFtp.git"
-  },
-  "author": "Yassine Fatihi - Louis Adam",
+  "author": "Louis Adam, Yassine Fatihi",
   "license": "MIT",
-  "bugs": {
-    "url": "https://github.com/Yassine94/myFtp/issues"
+  "dependencies": {
+    "chalk": "^2.4.2"
   },
-  "homepage": "https://github.com/Yassine94/myFtp#readme"
+  "devDependencies": {
+    "@babel/core": "^7.6.2",
+    "@babel/node": "^7.6.2",
+    "@babel/preset-env": "^7.6.2",
+    "nodemon": "^1.19.2"
+  }
 }

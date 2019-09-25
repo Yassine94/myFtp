@@ -1,1 +1,2 @@
 # myFtp
+School project
