@@ -1,52 +1,57 @@
-import net from 'net'
 import { argv, log } from '../common/utils'
-import readlLine from 'readline'
+import readLine from 'readline'
 import fs from 'fs'
 import path from 'path'
 import ClientFactory from './clientFactory'
 import FtpUpload from './ftpUpload'
 
+
 class FtpClient extends ClientFactory {
 
     constructor(host, port){
         super(host, port);
+        super.connect()
     }
 
 
     prompt(){
         log(">>> ", "white", false);
-        const rl = readlLine.createInterface({
+        const rl = readLine.createInterface({
             input: process.stdin
         });
         rl.on('line', (input) => {
             const [ cmd, filename] = input.split(' ');
             const filepath = filename ? path.join(process.cwd(), filename) : path.join(process.cwd());
             if(cmd.toUpperCase() === 'STOR'){
-
-                if (!fs.existsSync(filepath)){
-                    log("There is no file there", "red");
-                    return
-                }
-                this.socket.write(input);
-                this.socket.on('data', (data) => {
-                    const tmp_port = parseInt(data);
-                    let tmp_socket = net.createConnection({
-                        port: tmp_port,
-                        host: this.host
-                    }, () => {
-                        log('client connected', "cyan");
-                        this.prompt();
-
-                    });
-                })
-
+                this.upload(filename, filepath);
             } else {
-                this.socket.write(input);
+                this.socketCmd.write(input);
                 rl.close();
             }
         });
     }
+
+    upload(filename, filepath){
+        if (!fs.existsSync(filepath)){
+            log("There is no file there", "red");
+            return
+        }
+        this.socketCmd.write(`stor ${filename}`);
+        this.socketCmd.on('data', (data) => {
+            this.socketCmd.setEncoding('ascii');
+            const tmp_port = parseInt(data);
+            console.log('i receive a port? ', tmp_port);
+            // let tmp_socket = new FtpUpload(this.host, tmp_port, filepath);
+
+            //tmp_socket.disconnect();
+        })
+    }
+
 }
+
+
+
+
 
 const args = argv();
 if (args.length !== 2){

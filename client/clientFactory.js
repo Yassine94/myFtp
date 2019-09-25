@@ -6,30 +6,58 @@ export default class ClientFactory {
     constructor(host, port) {
         this.host = host;
         this.port = port;
-        this.socket = this.connect();
+        this.socketCmd;
+        this.socketData;
     }
 
     connect() {
-        let socket = net.createConnection({
+        this.socketCmd = net.createConnection({
             port: this.port,
             host: this.host
         }, () => {
             log('client connected', "cyan");
-            this.prompt();
+            this.prompt()
 
         });
-        socket.on('data', (data) => {
+        this.socketCmd.on('data', (data) => {
             log(data.toString(), "yellow");
-            this.prompt();
+            this.prompt()
+
         });
-        socket.on('end', () => {
+        this.socketCmd.on('end', () => {
             log('client disconnected', 'cyan');
             process.exit(0)
         })
-        return socket
+        this.socketCmd
     }
 
-    disconnect(){
-        this.socket.end()
+    connectData(port) {
+        this.socketData = net.createConnection({
+            port: port,
+            host: this.host
+        }, () => {
+            log('data connected', "cyan");
+            this.prompt()
+
+        });
+        this.socketData.on('data', (data) => {
+            log(data.toString(), "yellow");
+            this.prompt()
+
+        });
+        this.socketData.on('end', () => {
+            log('data disconnected', 'cyan');
+            process.exit(0)
+        })
+        this.socketData
     }
+
+    disconnect(socket_to_close){
+        this[socket_to_close].write("quit")
+    }
+
+    prompt(){
+        pass
+    }
+
 }
