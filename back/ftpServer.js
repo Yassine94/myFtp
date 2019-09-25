@@ -2,11 +2,11 @@ import dbUser from '../config/db.json'
 import path from 'path'
 import fs from 'fs'
 import { isAllowedCommand, isAllowLoggedCommands } from '../common/utils'
-import { Server } from './server'
+import { ServerFactory } from './serverFactory'
 import { exec } from 'child_process'
 
 
-class FtpServer extends Server {
+class FtpServer extends ServerFactory {
 
     constructor(){
         super();
@@ -30,7 +30,7 @@ class FtpServer extends Server {
 
             socket.on('close', () => {
                 console.log("socket disconnected.")
-            })
+            });
 
             socket.on('data', (data) => {
                 //TODO create command directory and use index.js
@@ -110,20 +110,15 @@ class FtpServer extends Server {
     }
 
     list(socket){
-        let root_dir = socket.session.directory.split('/');
-        root_dir.pop()
-        const user_current_dir = socket.session.pwd;
-        exec(`ls -l ${path.join(root_dir.join('/'), user_current_dir)}`, (e, stdout, stderr) => {
+        exec(`ls -l ${this.getPath(socket, socket.session.pwd)}`, (e, stdout, stderr) => {
             socket.write(stdout)
         })
     }
 
     cwd(socket, directory){
         if (directory !== '..'){
-            const temp_dir = path.join(socket.session.pwd, directory);
-            let root_dir = socket.session.directory.split('/');
-            root_dir.pop()
-            const temp_dir_root = path.join(root_dir.join('/'), temp_dir);
+
+            const temp_dir_root = this.getPath(socket, directory);
 
             if(fs.existsSync(temp_dir_root)){
                 socket.session.pwd = temp_dir;
@@ -146,12 +141,18 @@ class FtpServer extends Server {
 
     stor(socket, filename){
         const tmp_port = 4545;
+        socket.write(tmp_port.toString());
+        console.log(socket)
+        console.log("i create a new socket");
         let temp_server = super.create(tmp_port, (tmp_socket) => {
             const writer = fs.createWriteStream(filename);
             tmp_socket.on('data', (data) => {
-                //TODO finish this
-                writer.on('ready', )
-            })
+                writer.on('ready', console.log(data));
+
+            });
+            tmp_socket.on('end', () => {
+                tmp_socket.end();
+            });
         });
 
     }
@@ -164,6 +165,14 @@ class FtpServer extends Server {
         }
         socket.session.directory = tmpPath;
         socket.session.pwd = `/${username}`;
+    }
+
+    getPath(socket, path){
+        const temp_dir = path ? path.join(socket.session.pwd, path) : path.join(socket.session.pwd);
+        let root_dir = socket.session.directory.split('/');
+        root_dir.pop();
+        const temp_dir_root = path.join(root_dir.join('/'), temp_dir);
+        return temp_dir_root;
     }
 }
 

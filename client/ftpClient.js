@@ -3,32 +3,15 @@ import { argv, log } from '../common/utils'
 import readlLine from 'readline'
 import fs from 'fs'
 import path from 'path'
+import ClientFactory from './clientFactory'
+import FtpUpload from './ftpUpload'
 
-class FtpClient {
+class FtpClient extends ClientFactory {
+
     constructor(host, port){
-        this.host = host;
-        this.port = port;
+        super(host, port);
     }
 
-    connect(){
-        this.socket = net.createConnection({
-            port: this.port,
-            host: this.host
-        }, () => {
-            log('client connected', "cyan");
-            this.isReady = true;
-            this.prompt();
-
-        });
-        this.socket.on('data', (data) => {
-            log(data.toString(), "yellow");
-            this.prompt();
-        });
-        this.socket.on('end', () => {
-            log('client disconnected', 'cyan');
-            process.exit(0)
-        })
-    }
 
     prompt(){
         log(">>> ", "white", false);
@@ -39,10 +22,23 @@ class FtpClient {
             const [ cmd, filename] = input.split(' ');
             const filepath = filename ? path.join(process.cwd(), filename) : path.join(process.cwd());
             if(cmd.toUpperCase() === 'STOR'){
+
                 if (!fs.existsSync(filepath)){
                     log("There is no file there", "red");
                     return
                 }
+                this.socket.write(input);
+                this.socket.on('data', (data) => {
+                    const tmp_port = parseInt(data);
+                    let tmp_socket = net.createConnection({
+                        port: tmp_port,
+                        host: this.host
+                    }, () => {
+                        log('client connected', "cyan");
+                        this.prompt();
+
+                    });
+                })
 
             } else {
                 this.socket.write(input);
@@ -60,5 +56,4 @@ if (args.length !== 2){
 
 const [host, port] = args;
 
-const client = new FtpClient(host, port);
-client.connect();
+const ftpClient = new FtpClient(host, port);

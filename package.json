@@ -5,8 +5,8 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "launch:client": "nodemon --exec babel-node client/client.js 127.0.0.1 2121 ",
-    "launch:server": "nodemon back/ftp.js --exec babel-node"
+    "launch:client": "nodemon --exec babel-node client/ftpClient.js 127.0.0.1 2121 ",
+    "launch:server": "nodemon back/ftpServer.js --exec babel-node"
   },
   "author": "Louis Adam, Yassine Fatihi",
   "license": "MIT",

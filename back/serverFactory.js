@@ -1,7 +1,7 @@
 import net from 'net'
 
 
-export class Server {
+export class ServerFactory {
 
     create(port, callback){
         let instance = net.createServer(callback);
